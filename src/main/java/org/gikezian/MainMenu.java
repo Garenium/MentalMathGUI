@@ -18,7 +18,7 @@ public class MainMenu {
 
     private static short rangeA;
     private static short rangeB;
-    private static short questionNo;
+    private static short numQuestions;
 
     public static GridPane getMainMenu() {
 
@@ -74,7 +74,7 @@ public class MainMenu {
                     if (numQuestionInput.length() > 3) {
                         userPrompt.setText("Number of questions is too long.");
                     } else {
-                        questionNo = Short.parseShort(numQuestionInput);
+                        numQuestions = Short.parseShort(numQuestionInput);
 
                         if (rangeInput.matches("\\d{1,4}, \\d{1,4}") || rangeInput.matches("\\d{1,4},\\d{1,4}")) {
                             String[] ranges = rangeInput.split(",\\s*");
@@ -105,9 +105,19 @@ public class MainMenu {
             userPrompt.setText(null);
         });
 
-
-
         return gp;
+    }
+
+    public static short getNumQuestions() {
+        return numQuestions;
+    }
+
+    public static short getRangeA() {
+        return rangeA;
+    }
+
+    public static short getRangeB() {
+        return rangeB;
     }
 }
 
