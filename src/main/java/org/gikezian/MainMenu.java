@@ -5,37 +5,25 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+
+import java.io.IOException;
 
 import static javafx.geometry.Pos.CENTER;
 
 public class MainMenu {
 
-    private IntegerProperty startA = new SimpleIntegerProperty();
-    private IntegerProperty startB = new SimpleIntegerProperty();
-    private IntegerProperty QuestionNo = new SimpleIntegerProperty();
+    private static short rangeA;
+    private static short rangeB;
+    private static short questionNo;
 
-    public static GridPane getGridPane() {
-        Label numQuestionLabel = new Label("No. of Questions:");
-        TextField numQuestionInp = new TextField();
-
-        Label rangeLabel = new Label("Range:");
-        TextField rangeInp = new TextField();
-
-        Label userPrompt = new Label("Test");
-        userPrompt.setTextFill(Color.web("#ff5050"));
-
-        ButtonBar buttonBar = new ButtonBar();
-        Button startButton = new Button("Start");
-        Button clearButton = new Button("Clear");
-        buttonBar.getButtons().addAll(startButton, clearButton);
+    public static GridPane getMainMenu() {
 
         GridPane gp = new GridPane();
+        gp.setGridLinesVisible(true);
 
         //Set the size for the pane
         gp.setMinSize(800,400);
@@ -45,45 +33,81 @@ public class MainMenu {
 
         //Setting the vertical and horizontal gaps between the columns
         gp.setVgap(10);
-        gp.setHgap(15);
+        gp.setHgap(30);
 
-        //Sett the grid alignment
+        //Set the grid alignment
         gp.setAlignment(CENTER);
+
+        Label numQuestionLabel = new Label("Number of Questions:");
+        TextField numQuestionInp = new TextField();
+
+        Label rangeLabel = new Label("Range:");
+        rangeLabel.setTooltip(new Tooltip("It is [a, b] inclusive. It can be in any order."));
+        TextField rangeInp = new TextField();
+
+        Label userPrompt = new Label("Test user prompt");
+        userPrompt.setTextFill(Color.web("#ff5050"));
+
+        ButtonBar buttonBar = new ButtonBar();
+        Button startButton = new Button("Start");
+        Button clearButton = new Button("Clear");
+        buttonBar.getButtons().addAll(startButton, clearButton);
+
+        //Wrap ButtonBar to control ButtonBar padding
+        HBox buttonBarContainer = new HBox(buttonBar);
+        buttonBarContainer.setPadding(new Insets(0,0,0,-20));
 
         gp.add( numQuestionLabel, 0, 0 );
         gp.add( numQuestionInp, 1, 0 );
         gp.add( rangeLabel, 0, 1 );
         gp.add( rangeInp, 1, 1 );
         gp.add( userPrompt, 1, 2 );
-        gp.add(buttonBar, 1,4);
+        gp.add(buttonBarContainer, 0,2);
 
         //Setting an action for the Submit button
-//    startButton.setOnAction(new EventHandler<ActionEvent>() {
-//
-//        @Override
-//        public void handle(ActionEvent e) {
-//            if ((numQuestionInp.getText() != null && !numQuestionInp.getText().isEmpty())) {
-//                label.setText(name.getText() + " " + lastName.getText() + ", "
-//                        + "thank you for your comment!");
-//            } else {
-//                userPrompt.setText("Invalid input");
-//            }
-//        }
-//    });
+        startButton.setOnAction(e -> {
+            String numQuestionInput = numQuestionInp.getText().trim();
+            String rangeInput = rangeInp.getText().trim();
 
-        //Setting an action for the Clear button
-        clearButton.setOnAction(new EventHandler<ActionEvent>() {
+            if (!rangeInput.isEmpty() && !numQuestionInput.isEmpty()) {
+                try {
+                    if (numQuestionInput.length() > 3) {
+                        userPrompt.setText("Number of questions is too long.");
+                    } else {
+                        questionNo = Short.parseShort(numQuestionInput);
 
-            @Override
-            public void handle(ActionEvent e) {
-                numQuestionInp.clear();
-                rangeInp.clear();
-                userPrompt.setText(null);
+                        if (rangeInput.matches("\\d{1,4}, \\d{1,4}") || rangeInput.matches("\\d{1,4},\\d{1,4}")) {
+                            String[] ranges = rangeInput.split(",\\s*");
+                            rangeA = Short.parseShort(ranges[0]);
+                            rangeB = Short.parseShort(ranges[1]);
+
+                            SceneController.switchToQuiz(e);
+                        } else {
+                            userPrompt.setText("Range is invalid. (Ex: '1, 100')");
+                        }
+
+                    }
+                } catch (NumberFormatException ex) {
+                    userPrompt.setText("Please ensure all inputs are numbers.");
+                } catch (IOException ex) {
+                    userPrompt.setText("Error loading the quiz. Please try again.");
+                    ex.printStackTrace();
+                }
+            } else {
+                userPrompt.setText("Please fill in all fields.");
             }
         });
 
+        //Setting an action for the Clear button
+        clearButton.setOnAction(e -> {
+            numQuestionInp.clear();
+            rangeInp.clear();
+            userPrompt.setText(null);
+        });
+
+
+
         return gp;
     }
-
 }
 
